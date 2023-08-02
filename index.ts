@@ -15,7 +15,7 @@ interface RequestWithUser extends Request {
     user?: string | JwtPayload;
 }
 
-const app = express();
+export const app = express();
 const upload = multer({ dest: "uploads/" });
 
 let db: sqlite3.Database;
