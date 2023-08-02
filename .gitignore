@@ -3,3 +3,4 @@
 yarn.lock
 node_modules
 db.sqlite3
+.yarnrc.yml
