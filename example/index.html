@@ -98,21 +98,16 @@
     </style>
     <script>
         let authToken;
-
-        let hosting = 'http://localhost:4269';
-
-        async function setHosting() {
-            hosting = document.getElementById("hosting").value;
-            alert('Hosting set to ' + hosting);
-        }
+        let hosting;
 
         async function login(event) {
             event.preventDefault();
 
+            hosting = document.getElementById("hosting").value;
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
-            const response = await fetch('http://localhost:4269/login', {
+            const response = await fetch(`${hosting}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -124,7 +119,6 @@
                 authToken = await response.json();
                 document.getElementById("login-form").style.display = "none";
                 document.getElementById("upload-form").style.display = "block";
-
                 await listPackages();
             } else {
                 alert('Login failed');
@@ -138,7 +132,7 @@
             const formData = new FormData();
             formData.append('package', fileInput.files[0]);
 
-            const response = await fetch('http://localhost:4269/upload', {
+            const response = await fetch(`${hosting}/upload`, {
                 method: 'POST',
                 headers: {
                     'auth-token': authToken,
@@ -155,7 +149,7 @@
         }
 
         async function listPackages() {
-            const response = await fetch('http://localhost:4269/packages');
+            const response = await fetch(`${hosting}/packages`);
 
             if (response.ok) {
                 const packages = await response.json();
@@ -164,7 +158,7 @@
                 packages.forEach(pkg => {
                     const listItem = document.createElement('li');
                     const link = document.createElement('a');
-                    link.href = `http://localhost:4269/packages/${pkg.name}`;
+                    link.href = `${hosting}/packages/${pkg.name}`;
                     link.textContent = pkg.name;
                     link.target = "_blank"; // To open in a new tab
                     listItem.appendChild(link);
@@ -181,8 +175,7 @@
 
 <form id="login-form" onsubmit="login(event)">
     <label for="hosting">Hosting:</label>
-    <input type="text" id="hosting" name="hosting" value="http://localhost:4269" style="width: 70%;">
-    <button type="button" onclick="setHosting()">Set</button>
+    <input type="text" id="hosting" name="hosting" value="http://localhost:4269" style="width: 96%;">
     <label for="username">Username:</label>
     <input type="text" id="username" name="username">
     <label for="password">Password:</label>
