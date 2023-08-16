@@ -57,6 +57,8 @@ describe('Package Management', () => {
     it('should respond with a list of packages', async () => {
         const res = await request(server).get('/packages');
 
+        console.log(res.body)
+
         expect(res.status).toBe(200);
         expect(Array.isArray(res.body)).toBe(true);
     });
