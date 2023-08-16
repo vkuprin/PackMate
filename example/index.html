@@ -55,6 +55,38 @@
         #upload-form {
             display: none;
         }
+
+        #packages-list {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        #packages-list h3 {
+            margin: 0;
+            padding-bottom: 10px;
+            color: #333;
+            border-bottom: 1px solid #ccc;
+        }
+
+        #packages-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #packages-list li {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 5px;
+            background-color: #f9f9f9;
+        }
+
+        #packages-list li:hover {
+            background-color: #e9e9e9;
+        }
     </style>
     <script>
         let authToken;
@@ -77,6 +109,8 @@
                 authToken = await response.json();
                 document.getElementById("login-form").style.display = "none";
                 document.getElementById("upload-form").style.display = "block";
+
+                await listPackages();
             } else {
                 alert('Login failed');
             }
@@ -103,6 +137,24 @@
                 alert('File upload failed');
             }
         }
+
+        async function listPackages() {
+            const response = await fetch('http://localhost:4269/packages');
+
+            if (response.ok) {
+                const packages = await response.json();
+                const packagesList = document.getElementById('packages');
+                packagesList.innerHTML = ''; // Clear previous content
+                packages.forEach(pkg => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = pkg.name;
+                    packagesList.appendChild(listItem);
+                });
+                document.getElementById("packages-list").style.display = "block";
+            } else {
+                alert('Failed to load packages');
+            }
+        }
     </script>
 </head>
 <body>
@@ -118,5 +170,9 @@
     <input type="file" id="file" name="file">
     <button type="submit">Upload</button>
 </form>
+<div id="packages-list" style="display:none;">
+    <h3>Packages:</h3>
+    <ul id="packages"></ul>
+</div>
 </body>
 </html>
