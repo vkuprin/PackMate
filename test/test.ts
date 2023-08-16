@@ -1,15 +1,20 @@
 import request from 'supertest';
 import { app } from '../index';
 import { Server } from 'http';
+import fs from 'fs';
+import path from 'path';
 
 describe('Authentication', () => {
     let server: Server;
 
-    beforeAll((done) => {
+    beforeAll(async () => {
         server = app.listen(0, () => {
-            done();
+            const address = server.address();
+            const port = typeof address === 'string' ? address : address?.port;
+            console.log(`Listening on port ${port}`);
         });
-    });
+    }, 10000);
+
 
     afterAll((done) => {
         server.close(done);
@@ -36,12 +41,14 @@ describe('Authentication', () => {
 
 describe('Package Management', () => {
     let server: Server;
+    let token: string;
 
-    beforeAll((done) => {
+    beforeAll(async () => {
         server = app.listen(0, () => {
-            done();
+            console.log(`Listening on port ${server.address()}`);
         });
-    });
+        token = await authenticateAs(server, 'testuser', 'password');
+    }, 10000);
 
     afterAll((done) => {
         server.close(done);
@@ -54,13 +61,34 @@ describe('Package Management', () => {
         expect(Array.isArray(res.body)).toBe(true);
     });
 
-    it('should respond with details of a specific package', async () => {
-        const packageName = 'some-package-name';
-        const res = await request(server).get(`/packages/${packageName}`);
+    it('should upload a package and find it', async () => {
+        const randomName = 'temp-file.txt';
+        console.log(__dirname);
+        const filePath = path.join(__dirname, '..', 'packages', 'temp-file.txt');
 
-        console.log(res.body);
+        fs.writeFileSync(filePath, '');
+
+        let res = await request(server)
+            .post('/upload')
+            .set('auth-token', token)
+            .attach('package', filePath, randomName);
 
         expect(res.status).toBe(200);
-        expect(typeof res.body).toBe('object');
+
+        res = await request(server).get(`/packages/${randomName}`);
+        expect(res.status).toBe(200);
+
+        console.log(res.body);
+        expect(res.body.name).toBe(randomName);
+
+        fs.unlinkSync(filePath);
     });
 });
+
+async function authenticateAs(server: Server, username: string, password: string): Promise<string> {
+    const res = await request(server)
+        .post('/login')
+        .send({ username, password });
+
+    return res.body;
+}
