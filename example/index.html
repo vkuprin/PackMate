@@ -87,9 +87,24 @@
         #packages-list li:hover {
             background-color: #e9e9e9;
         }
+
+        #hosting-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
     </style>
     <script>
         let authToken;
+
+        let hosting = 'http://localhost:4269';
+
+        async function setHosting() {
+            hosting = document.getElementById("hosting").value;
+            alert('Hosting set to ' + hosting);
+        }
 
         async function login(event) {
             event.preventDefault();
@@ -163,7 +178,11 @@
     </script>
 </head>
 <body>
+
 <form id="login-form" onsubmit="login(event)">
+    <label for="hosting">Hosting:</label>
+    <input type="text" id="hosting" name="hosting" value="http://localhost:4269" style="width: 70%;">
+    <button type="button" onclick="setHosting()">Set</button>
     <label for="username">Username:</label>
     <input type="text" id="username" name="username">
     <label for="password">Password:</label>
