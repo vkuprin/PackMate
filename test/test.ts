@@ -2,14 +2,11 @@ import request from 'supertest';
 import { app } from '../index';
 import { Server } from 'http';
 
-describe('POST /login', () => {
+describe('Authentication', () => {
     let server: Server;
-
-    let port: number;
 
     beforeAll((done) => {
         server = app.listen(0, () => {
-            port = (server.address() as any).port;
             done();
         });
     });
@@ -23,7 +20,6 @@ describe('POST /login', () => {
             .post('/login')
             .send({ username: 'testuser', password: 'password' });
 
-        console.log(res.body);
         expect(res.status).toBe(200);
         expect(typeof res.body).toBe('string');
     });
@@ -35,5 +31,36 @@ describe('POST /login', () => {
 
         expect(res.status).toBe(400);
         expect(res.body).toBe("Wrong password or username");
+    });
+});
+
+describe('Package Management', () => {
+    let server: Server;
+
+    beforeAll((done) => {
+        server = app.listen(0, () => {
+            done();
+        });
+    });
+
+    afterAll((done) => {
+        server.close(done);
+    });
+
+    it('should respond with a list of packages', async () => {
+        const res = await request(server).get('/packages');
+
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+    });
+
+    it('should respond with details of a specific package', async () => {
+        const packageName = 'some-package-name';
+        const res = await request(server).get(`/packages/${packageName}`);
+
+        console.log(res.body);
+
+        expect(res.status).toBe(200);
+        expect(typeof res.body).toBe('object');
     });
 });

@@ -1,9 +1,9 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 import multer from 'multer';
-import { exec } from "child_process";
+import {exec} from "child_process";
 import sqlite3 from 'sqlite3';
 import cors from 'cors';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt, {JwtPayload} from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 interface User {
@@ -16,7 +16,6 @@ declare module 'express-serve-static-core' {
         user?: string | JwtPayload;
     }
 }
-
 
 export const app = express();
 const upload = multer({ dest: "uploads/" });
@@ -32,6 +31,8 @@ function openDb() {
     });
 
     db.run('CREATE TABLE IF NOT EXISTS users(username TEXT UNIQUE, password TEXT)', createAdminUser);
+    db.run('CREATE TABLE IF NOT EXISTS packages(name TEXT UNIQUE, description TEXT, latest_version TEXT)');
+    db.run('CREATE TABLE IF NOT EXISTS package_versions(package_id INTEGER, version TEXT, filepath TEXT, FOREIGN KEY (package_id) REFERENCES packages(rowid))');
 }
 
 async function createAdminUser() {
@@ -78,13 +79,41 @@ const verify = (req: Request, res: Response, next: NextFunction) => {
     if (!token) return res.status(401).json('Access Denied');
 
     try {
-        const verified = jwt.verify(token, process.env.TOKEN_SECRET || "token");
-        req.user = verified;
+        req.user = jwt.verify(token, process.env.TOKEN_SECRET || "token");
         next();
     } catch (error) {
         res.status(400).json('Invalid Token');
     }
 };
+
+app.get('/packages', (req: Request, res: Response) => {
+    db.all("SELECT * FROM packages", [], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).json('Error retrieving packages');
+        } else {
+            res.json(rows);
+        }
+    });
+});
+
+app.get('/packages/:packageName', (req: Request, res: Response) => {
+    const { packageName } = req.params;
+    db.get("SELECT * FROM packages WHERE name = ?", [packageName], (err, row) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).json('Error retrieving package');
+            return;
+        }
+
+        if (!row) {
+            res.status(404).json({ message: 'Package not found' });
+            return;
+        }
+
+        res.json(row);
+    });
+});
 
 app.use("/packages", express.static("packages"));
 
