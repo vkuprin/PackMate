@@ -5,7 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "start": "ts-node index.ts",
-    "test": "jest"
+    "test": "jest",
+    "selfhost": "ngrok http 4269"
   },
   "repository": {
     "type": "git",
