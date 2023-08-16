@@ -132,6 +132,7 @@
             });
 
             if (response.ok) {
+                await listPackages();
                 alert('File uploaded successfully!');
             } else {
                 alert('File upload failed');
