@@ -90,7 +90,7 @@ app.use("/packages", express.static("packages"));
 
 app.post("/upload", [verify, upload.single("package")], (req: Request, res: Response) => {
     if (req.file && "originalname" in req.file) {
-        exec(`mv ${req.file.path} packages/${req.file.originalname} && rm -r uploads/*`, (error) => {
+        exec(`mv "${req.file.path}" "packages/${req.file.originalname}"`, (error) => {
             if (error) {
                 console.error(`Error moving file: ${error}`);
                 res.sendStatus(500);
