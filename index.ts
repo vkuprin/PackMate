@@ -11,9 +11,12 @@ interface User {
     password: string;
 }
 
-interface RequestWithUser extends Request {
-    user?: string | JwtPayload;
+declare module 'express-serve-static-core' {
+    interface Request {
+        user?: string | JwtPayload;
+    }
 }
+
 
 export const app = express();
 const upload = multer({ dest: "uploads/" });
@@ -28,7 +31,20 @@ function openDb() {
         }
     });
 
-    db.run('CREATE TABLE IF NOT EXISTS users(username TEXT UNIQUE, password TEXT)');
+    db.run('CREATE TABLE IF NOT EXISTS users(username TEXT UNIQUE, password TEXT)', createAdminUser);
+}
+
+async function createAdminUser() {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash('password', salt);
+
+    db.run("INSERT OR IGNORE INTO users(username, password) VALUES(?, ?)", ['testuser', hashedPassword], (err) => {
+        if (err) {
+            console.error(`Could not insert admin user: ${err.message}`);
+        } else {
+            console.log('Admin user created or already exists');
+        }
+    });
 }
 
 openDb();
@@ -57,7 +73,7 @@ app.post('/login', async (req: Request, res: Response) => {
     });
 });
 
-const verify = (req: RequestWithUser, res: Response, next: NextFunction) => {
+const verify = (req: Request, res: Response, next: NextFunction) => {
     const token = req.header('auth-token');
     if (!token) return res.status(401).json('Access Denied');
 
@@ -72,7 +88,7 @@ const verify = (req: RequestWithUser, res: Response, next: NextFunction) => {
 
 app.use("/packages", express.static("packages"));
 
-app.post("/upload", [verify, upload.single("package")], (req: RequestWithUser, res: Response) => {
+app.post("/upload", [verify, upload.single("package")], (req: Request, res: Response) => {
     if (req.file && "originalname" in req.file) {
         exec(`mv ${req.file.path} packages/${req.file.originalname} && rm -r uploads/*`, (error) => {
             if (error) {
