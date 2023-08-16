@@ -6,6 +6,56 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0 auto;
+            padding: 20px;
+            max-width: 400px;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="file"] {
+            width: 96%;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #upload-form {
+            display: none;
+        }
+    </style>
     <script>
         let authToken;
 
@@ -59,16 +109,13 @@
 <form id="login-form" onsubmit="login(event)">
     <label for="username">Username:</label>
     <input type="text" id="username" name="username">
-    <br>
     <label for="password">Password:</label>
     <input type="password" id="password" name="password">
-    <br>
     <button type="submit">Login</button>
 </form>
-<form id="upload-form" onsubmit="upload(event)" style="display:none;">
+<form id="upload-form" onsubmit="upload(event)">
     <label for="file">Choose a file:</label>
     <input type="file" id="file" name="file">
-    <br>
     <button type="submit">Upload</button>
 </form>
 </body>
