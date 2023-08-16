@@ -147,7 +147,11 @@
                 packagesList.innerHTML = ''; // Clear previous content
                 packages.forEach(pkg => {
                     const listItem = document.createElement('li');
-                    listItem.textContent = pkg.name;
+                    const link = document.createElement('a');
+                    link.href = `http://localhost:4269/packages/${pkg.name}`;
+                    link.textContent = pkg.name;
+                    link.target = "_blank"; // To open in a new tab
+                    listItem.appendChild(link);
                     packagesList.appendChild(listItem);
                 });
                 document.getElementById("packages-list").style.display = "block";

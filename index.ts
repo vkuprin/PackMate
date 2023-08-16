@@ -5,6 +5,7 @@ import sqlite3 from 'sqlite3';
 import cors from 'cors';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import path from 'path';
 
 interface User {
     username: string;
@@ -97,6 +98,12 @@ app.get('/packages', (req: Request, res: Response) => {
     });
 });
 
+app.use("/packages", (req, res, next) => {
+    console.log(`File requested: ${req.originalUrl}, Full path: ${path.join(__dirname, 'packages', req.originalUrl)}`);
+    next();
+}, express.static("packages"));
+
+
 app.get('/packages/:name', (req: Request, res: Response) => {
     const name = req.params.name;
 
@@ -127,7 +134,7 @@ app.get('/packages/search', (req: Request, res: Response) => {
     });
 });
 
-app.use("/packages", express.static("packages"));
+// app.use("/packages", express.static("packages"));
 
 app.post("/upload", [verify, upload.single("package")], (req: Request, res: Response) => {
     if (req.user && 'role' in req.user && req.user.role !== 'reader') {
